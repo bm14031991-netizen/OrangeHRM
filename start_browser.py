@@ -1,0 +1,2 @@
+#browser = "remote"
+browser = "local"
