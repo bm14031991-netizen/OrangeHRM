@@ -127,7 +127,7 @@ def driver_setup(auth_func, user_func, url, options_local, options_remote, marke
 # Фикстуры, использующие универсальную функцию driver_setup
 @pytest.fixture(scope="session")
 def create_driver_orange(get_chrome_options_local, get_chrome_options_remote):
-    yield from driver_setup(login.param_auth, login.user_end_to_end, BASE_URL, get_chrome_options_local, get_chrome_options_remote, "EndToEnd")
+    yield from driver_setup(login.param_auth, login.user_end_to_end, BASE_URL, get_chrome_options_local, get_chrome_options_remote, "e2e")
 
 
 @pytest.fixture(scope="session")

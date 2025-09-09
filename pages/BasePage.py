@@ -27,7 +27,7 @@ class BasePage:
         self.wait.until(EC.presence_of_element_located(locator))
 
     def find_element_display(self, locator):
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(locator))
+        WebDriverWait(self.driver, 3).until(EC.presence_of_element_located(locator))
 
     def find_wait_element(self, locator):
         time.sleep(1)
@@ -45,31 +45,6 @@ class BasePage:
     def click(self, locator):
         self.wait.until(EC.element_to_be_clickable(locator)).click()
 
-    def find_most_recent_date(self):
-        # Находим все строки, содержащие дату госпитализации
-        rows = self.driver.find_elements(By.XPATH, "//tr[@data-id]")
-        most_recent_date = None
-        most_recent_row = None
-        for row in rows:
-            # Находим элемент с датой госпитализации
-            date_text = row.find_element(By.XPATH, ".//span[contains(text(), 'Дата госпитализации')]").text
-            # Извлекаем дату из строки
-            hospital_date_text = date_text.split(":")[1].strip()
-            # Проверяем, содержит ли строка точное время (часы и минуты)
-            if len(hospital_date_text.split(":")) == 1:  # Если есть только часы
-                hospital_date_text += ":00"  # Добавляем минуты по умолчанию
-            try:
-                # Преобразуем текст даты в объект datetime
-                hospital_date = datetime.strptime(hospital_date_text, "%d.%m.%Y %H:%M")
-            except ValueError as e:
-                print(f"Ошибка при парсинге даты: {e}")
-                continue
-            # Сравниваем даты и находим самую свежую
-            if most_recent_date is None or hospital_date > most_recent_date:
-                most_recent_date = hospital_date
-                most_recent_row = row
-        return most_recent_row
-
     def click_script(self, locator):
         find_el = self.wait.until(EC.element_to_be_clickable(locator))
         self.driver.execute_script("arguments[0].click();", find_el)
@@ -81,26 +56,17 @@ class BasePage:
         find_el = WebDriverWait(self.driver, 20).until(EC.presence_of_element_located(((By.XPATH, '//*[@class="loading-modal"]'))))
         find_el.value_of_css_property('display: none;')
 
-
     def click_wait_script(self, locator):
         find_el = self.wait.until(EC.element_to_be_clickable(locator))
         time.sleep(1)
         self.driver.execute_script("arguments[0].click();", find_el)
 
-    def hosp_display_none(self):
-        self.find_element_display((By.XPATH, '//*[@id="loading" and contains(@style,"display: none;")]'))
-
-    def poly_display_none(self):
+    def display_none(self):
         # Ждём до 10 секунд или до тех пор, пока элемент не исчезнет, Если элемент исчезнет раньше, то выполнение кода продолжится немедленно
         WebDriverWait(self.driver, 10).until(EC.invisibility_of_element_located((By.XPATH, '//*[@class="pre-loader" and @style="display: block;"]')))
 
 
-        # self.find_element_display((By.XPATH, '//*[@class="pre-loader" and @style="display: none;"]'))
-
-    # def resource_display_none(self):
-    #     self.find_element_display((By.XPATH, '//*[@class="el-loading-mask" and @style="display: none;"]'))
-
-    def click_wait_list(self, locator):
+    def click_wait(self, locator):
         time.sleep(1)
         self.wait.until(EC.visibility_of_all_elements_located(locator))
         self.wait.until(EC.element_to_be_clickable(locator)).click()
@@ -133,17 +99,6 @@ class BasePage:
     def switch_to_frame_base(self):
         self.switch_iframe((By.TAG_NAME, 'iframe'))
 
-    # def write_buffer(self, name):
-    #     pyperclip.copy(name)  # Копирует в буфер обмена информацию
-    #     pyperclip.paste()
-
-
-    # def qweqwe(self):
-    #     try:
-    #         self.find_element((By.XPATH, '//*[@id="loading" and contains(@style, "display: none")]'))
-    #         return True
-    #     except TimeoutException:
-    #         return False
 
     def is_elem_displayed(self, webelement):
         try:
@@ -389,16 +344,7 @@ class BasePage:
         find_el = self.wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="{ID}"]')))
         find_el.click()
         self.driver.execute_script(f'document.getElementById("{ID}").value = "{value}"')
-        find_el = self.wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="{ID}"]')))
-        # find_el.send_keys(Keys.ENTER)
 
-    # def script_input_enter_value_click(self, ID, value):
-    #     find_el = self.wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="{ID}"]')))
-    #     find_el.click()
-    #     find_el = self.driver.execute_script(f'document.getElementById("{ID}").value = "{value}"')
-    #     #find_el.send_keys(Keys.ENTER)
-    #     #self.wait.until(EC.presence_of_element_located((By.XPATH, f'//*[@id="{ID}"]')))
-    #     # find_el.send_keys(Keys.ENTER)
 
     def script_with_clear(self, locator, locator2):
         time.sleep(1)
@@ -487,9 +433,10 @@ class BasePage:
         time.sleep(1)
         self.wait.until(EC.element_to_be_clickable((By.XPATH, f'''//*[contains(@id, "{ID}")]//li[text()='{text}']'''))).click()
 
+
     def class_wait_listbox_click(self, CLASS, text):
         time.sleep(1)
-        self.wait.until(EC.element_to_be_clickable((By.XPATH, f'''//*[@id="{CLASS}"]//li[text()='{text}']'''))).click()
+        self.wait.until(EC.element_to_be_clickable((By.XPATH, f'''//*[contains(@class, "{CLASS}")]//*[text()='{text}']'''))).click()
 
     def id_wait_text_click(self, ID, text):
         time.sleep(1)
@@ -1006,17 +953,6 @@ class BasePage:
     def is_present(self, locator):
         return self.wait.until(EC.visibility_of_element_located(locator))
 
-    # def datetime_now(self):
-    #     now = datetime.now()
-    #     dt_string = now.strftime("%d.%m.%Y %H:%M")
-    #     return dt_string
-    #
-    # def time_now(self):
-    #     now = datetime.now()
-    #     t_string = now.strftime("%H:%M")
-    #     return t_string
-
-    "<---------------STAGE2---------------->"
 
     def datetime_now(self):
         now = datetime.now()
@@ -1134,17 +1070,6 @@ class BasePage:
             a = now.strftime("%H:45")
             return a
 
-    "<---------------------UAT------------------------>"
-    # def datetime_now(self):
-    #     now = datetime.now()
-    #     dt_string = now.strftime("%d.%m.%Y %H:%M")
-    #     return dt_string
-
-    # def time_now(self):
-    #     now = datetime.now()
-    #     t_string = now.strftime("%H:%M")
-    #     return t_string
-    "<--------------------------------------------->"
 
     def assert_element(self, locator):
         try:
@@ -1160,46 +1085,6 @@ class BasePage:
             return False
         return True
 
-    def new_born_iin(self):
-        now = datetime.now()
-        iin = now.strftime("%y0101300001")
-        return iin
-
-    def iin_age18(self):
-        now = datetime.now()
-        a = now + dateutil.relativedelta.relativedelta(years=-18)
-        iin = a.strftime("%y0101600000")
-        return iin
-
-    def iin_age18_women(self):
-        now = datetime.now()
-        a = now + dateutil.relativedelta.relativedelta(years=-18)
-        iin = a.strftime("%y0101400001")
-        return iin
-
-    def iin_after_age18(self):
-        now = datetime.now()
-        a = now + dateutil.relativedelta.relativedelta(years=-19)
-        iin = a.strftime("%y0101300001")
-        return iin
-
-    def iin_after_age18_women(self):
-        now = datetime.now()
-        a = now + dateutil.relativedelta.relativedelta(years=-19)
-        iin = a.strftime("%y0101400001")
-        return iin
-
-    def iin_under_age18(self):
-        now = datetime.now()
-        a = now + dateutil.relativedelta.relativedelta(years=-17)
-        iin = a.strftime("%y0101300001")
-        return iin
-
-    def iin_under_age18_women(self):
-        now = datetime.now()
-        a = now + dateutil.relativedelta.relativedelta(years=-17)
-        iin = a.strftime("%y0101400001")
-        return iin
 
     def date_now(self):
         now = datetime.now()
@@ -1385,3 +1270,7 @@ class BasePage:
 
     def send_keys_escape(self):
         self.driver.switch_to.active_element.send_keys(Keys.ESCAPE)
+
+    def refresh_page(self):
+        self.driver.refresh()
+

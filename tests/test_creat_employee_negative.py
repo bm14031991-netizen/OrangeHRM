@@ -7,13 +7,12 @@ from pages.EmployeeProfile_page import EmployeeProfilePage
 from utils.data_generator import employee_name
 
 
-@pytest.mark.Smoke
-@pytest.mark.Regression
-class TestPolyDocAddAssignKDUWithoutRecordStateNameCode:
+class TestCreateEmployeeNegative:
 
-    @pytest.mark.uipolylkv
+    @pytest.mark.negative
 
-    def test_create_edit_employee_and_validate_ui(self, create_driver_orange):
+    def test_create_employee_negative(self, create_driver_orange):
+
         self.login_page = LoginPage(create_driver_orange)
         self.pim = PimPage(create_driver_orange)
         self.dashboard = DashboardPage(create_driver_orange)
@@ -21,5 +20,6 @@ class TestPolyDocAddAssignKDUWithoutRecordStateNameCode:
         self.login_page.go_to_pim()
         first, middle, last, full = employee_name()
         self.pim.click_add()
-        self.pim.create_employee(first, last)
+        self.pim.create_employee_negative(first)
+
         pass
